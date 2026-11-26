@@ -1,0 +1,49 @@
+[
+  {
+    "id": "alterNullability.dropNotNull.User.department",
+    "label": "Drop NOT NULL on \"User\".\"department\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "department",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"department\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "department"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"department\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop NOT NULL on \"department\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"department\" DROP NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"department\" is nullable",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "department",
+          "YES"
+        ]
+      }
+    ]
+  }
+]
